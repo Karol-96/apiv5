@@ -15,6 +15,7 @@ import os
 from fastapi.responses import HTMLResponse
 from functools import lru_cache
 from dotenv import load_dotenv
+import sys
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +23,13 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 # Cache configuration
 CACHE_SIZE = 128
@@ -281,7 +289,9 @@ async def process_data(request: ProcessDataRequest):
                 'timestamp': datetime.now().isoformat()
             }
         )
-
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 if __name__ == '__main__':
     import uvicorn
     port = int(os.getenv("PORT", 8000))
