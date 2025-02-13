@@ -2,4 +2,7 @@ curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
 apt-get update
 ACCEPT_EULA=Y apt-get install -y msodbcsql17
-gunicorn -c gunicorn.conf.py app:app
+#!/bin/bash
+cd /home/site/wwwroot
+source /home/site/wwwroot/antenv/bin/activate
+gunicorn --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 app:app
