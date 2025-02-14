@@ -72,15 +72,30 @@ class ProcessDataRequest(BaseModel):
     diagnoses: List[Diagnosis]
 
 def get_db_connection():
+    import platform
     """Establish a connection to the database."""
-    conn_str = (
-        'DRIVER={ODBC Driver 17 for SQL Server};'
-        f'SERVER={os.getenv("DB_SERVER")};'
-        f'DATABASE={os.getenv("DB_NAME")};'
-        f'UID={os.getenv("DB_USER")};'
-        f'PWD={os.getenv("DB_PASSWORD")};'
-    )
-    return pyodbc.connect(conn_str)
+    try:
+        # Determine the correct driver based on platform
+        if platform.system() == 'Windows':
+            driver = '{ODBC Driver 17 for SQL Server}'
+        else:
+            driver = 'ODBC Driver 18 for SQL Server'  # Linux uses unbracketed driver names
+        
+        conn_str = (
+            'DRIVER={ODBC Driver 18 for SQL Server};'  # Updated to version 18
+            f'SERVER={os.getenv("DB_SERVER")};'
+            f'DATABASE={os.getenv("DB_NAME")};'
+            f'UID={os.getenv("DB_USER")};'
+            f'PWD={os.getenv("DB_PASSWORD")};'
+            'Encrypt=yes;'
+            'TrustServerCertificate=yes;'
+            'Connection Timeout=60;'
+        )
+        logger.info("Attempting database connection with ODBC Driver 18...")
+        return pyodbc.connect(conn_str)
+    except Exception as e:
+        logger.error(f"Database connection error: {str(e)}")
+        raise
 
 @contextmanager
 def get_db_cursor():
@@ -244,8 +259,9 @@ async def process_data(request: ProcessDataRequest):
     """API endpoint to handle data processing with caching."""
     try:
         logger.info(f"Processing data for {len(request.memberships)} members and {len(request.diagnoses)} diagnoses")
-        memberships_dict = [membership.dict() for membership in request.memberships]
-        diagnoses_dict = [diagnosis.dict() for diagnosis in request.diagnoses]
+        # Update these lines to use model_dump instead of dict
+        memberships_dict = [membership.model_dump() for membership in request.memberships]
+        diagnoses_dict = [diagnosis.model_dump() for diagnosis in request.diagnoses]
         memberships_tuple = tuple(tuple(sorted(m.items())) for m in memberships_dict)
         diagnoses_tuple = tuple(tuple(sorted(d.items())) for d in diagnoses_dict)
         
