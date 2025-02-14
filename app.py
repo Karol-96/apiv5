@@ -82,7 +82,7 @@ def get_db_connection():
             driver = 'ODBC Driver 18 for SQL Server'  # Linux uses unbracketed driver names
         
         conn_str = (
-            'DRIVER={ODBC Driver 18 for SQL Server};'  # Updated to version 18
+            'DRIVER={driver};'  # Updated to version 18
             f'SERVER={os.getenv("DB_SERVER")};'
             f'DATABASE={os.getenv("DB_NAME")};'
             f'UID={os.getenv("DB_USER")};'
