@@ -1,12 +1,13 @@
 FROM python:3.11-slim
 
-WORKDIR /app
-
-# Install system dependencies for pymssql
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     freetds-dev \
     freetds-bin \
     unixodbc-dev \
+    tdsodbc \
+    gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure FreeTDS
@@ -15,14 +16,19 @@ host = 10.10.1.4\n\
 port = 1433\n\
 tds version = 7.4" > /etc/freetds.conf
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /app
 
-# Copy the rest of the application
+# Copy requirements first
+COPY requirements.txt .
+
+# Install Python packages
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
 COPY . .
 
-# Make the startup script executable
+# Make startup script executable
 RUN chmod +x startup.sh
 
 EXPOSE 8000
