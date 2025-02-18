@@ -222,7 +222,7 @@ def process_data_with_sp(cursor, payment_year, memberships, diagnoses):
             SELECT MemberID, FromDOS, ThruDOS, DxCode
             FROM #TempDiagnosis;
  
-            EXEC dbo.sp_RS_Medicare_PartC_Outer @PmtYear, @Membership, @DxTable;
+            EXEC dbo.sp_RS_Medicare_PartC_Suspect @PmtYear, @Membership, @DxTable;
         """, (payment_year,))
         
         results = cursor.fetchall()
