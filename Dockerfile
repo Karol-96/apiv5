@@ -31,6 +31,6 @@ COPY . .
 # Make startup script executable
 RUN chmod +x startup.sh
 
-EXPOSE 8000
+EXPOSE 8888
 
 CMD ["./startup.sh"]
